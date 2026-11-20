@@ -1,0 +1,37 @@
+# Tomcat
+server:
+  port: 9205
+
+# Spring
+spring:
+  application:
+    # 应用名称
+    name: share-device
+  profiles:
+    # 环境配置
+    active: dev
+  main:
+    allow-bean-definition-overriding: true #当遇到同样名字的时候，是否允许覆盖注册
+  cloud:
+    nacos:
+      # ★ 全局账号（2022.x 支持，config/discovery 共用）
+      username: nacos
+      password: nacos
+      discovery:
+        # 服务注册地址
+        server-addr: 192.168.136.128:8848
+        namespace:  9a99e50e-3a2b-4d16-a923-04ef33464f63
+      config:
+        # 配置中心地址
+        server-addr: 192.168.136.128:8848
+        namespace:  9a99e50e-3a2b-4d16-a923-04ef33464f63
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        shared-configs:
+          - application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+
+tencent:
+  map:
+    key: OQHBZ-JIQEB-33IUN-JCM4G-PX6N2-ZNBOL
+    key2: PYOBZ-Y6ZRZ-HMZXP-ZTMES-****-****
