@@ -36,6 +36,18 @@ public interface IOrderInfoService extends IService<OrderInfo> {
      */
     Map<String, Object> getOrderStatisticsData(String orderDateBegin, String orderDateEnd);
 
+    /**
+     * 查询区域（区县）订单统计图表数据
+     *
+     * @param provinceCode   省份编码
+     * @param cityCode       城市编码
+     * @param orderDateBegin 开始日期
+     * @param orderDateEnd   结束日期
+     * @return 区域统计图表数据
+     */
+    Map<String, Object> getRegionOrderStatisticsData(String provinceCode, String cityCode,
+                                                     String orderDateBegin, String orderDateEnd);
+
     Long saveOrder(SubmitOrderVo submitOrderVo);
 
     void endOrder(EndOrderVo endOrderVo);

@@ -81,4 +81,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         group by date_format(start_time, '%Y-%m-%d')
         order by order_date asc
     </select>
+
+    <select id="selectRegionOrderStatisticsData" resultType="java.util.LinkedHashMap">
+        select ifnull(r.name, s.district_code) as district_name,
+               count(1)                            as order_num,
+               ifnull(sum(oi.total_amount), 0)     as order_amount
+        from order_info oi
+        join station s on oi.start_station_id = s.id
+        left join region r on s.district_code = r.code
+        where oi.del_flag = '0'
+        <if test="provinceCode != null and provinceCode != ''">
+            and s.province_code = #{provinceCode}
+        </if>
+        <if test="cityCode != null and cityCode != ''">
+            and s.city_code = #{cityCode}
+        </if>
+        <if test="orderDateBegin != null and orderDateBegin != ''">
+            and oi.start_time &gt;= concat(#{orderDateBegin}, ' 00:00:00')
+        </if>
+        <if test="orderDateEnd != null and orderDateEnd != ''">
+            and oi.start_time &lt;= concat(#{orderDateEnd}, ' 23:59:59')
+        </if>
+        group by s.district_code, r.name
+        order by order_num desc
+    </select>
 </mapper>

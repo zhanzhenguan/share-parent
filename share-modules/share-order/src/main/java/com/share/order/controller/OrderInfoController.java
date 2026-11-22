@@ -67,6 +67,32 @@ public class OrderInfoController extends BaseController
     }
 
     /**
+     * 查询指定用户的订单列表
+     */
+    @Operation(summary = "查询用户订单列表")
+    @RequiresPermissions("order:orderInfo:list")
+    @GetMapping("/userList/{userId}")
+    public AjaxResult userList(@PathVariable("userId") Long userId)
+    {
+        return success(orderInfoService.selectOrderListByUserId(userId));
+    }
+
+    /**
+     * 区域订单统计图表数据（默认最近30天）
+     */
+    @Operation(summary = "区域订单统计图表数据")
+    @RequiresPermissions("order:orderInfo:list")
+    @GetMapping("/getRegionOrderStatisticsData")
+    public AjaxResult getRegionOrderStatisticsData(
+            @RequestParam(value = "provinceCode", required = false) String provinceCode,
+            @RequestParam(value = "cityCode", required = false) String cityCode,
+            @RequestParam(value = "orderDateBegin", required = false) String orderDateBegin,
+            @RequestParam(value = "orderDateEnd", required = false) String orderDateEnd)
+    {
+        return success(orderInfoService.getRegionOrderStatisticsData(provinceCode, cityCode, orderDateBegin, orderDateEnd));
+    }
+
+    /**
      * 导出订单列表
      */
     @Operation(summary = "导出订单列表")

@@ -111,6 +111,42 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         return result;
     }
 
+    @Override
+    public Map<String, Object> getRegionOrderStatisticsData(String provinceCode, String cityCode,
+                                                            String orderDateBegin, String orderDateEnd) {
+        // 未指定日期范围时，默认查询最近30天
+        if (StringUtils.isEmpty(orderDateBegin) || StringUtils.isEmpty(orderDateEnd)) {
+            LocalDate end = LocalDate.now();
+            LocalDate begin = end.minusDays(29);
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+            orderDateBegin = begin.format(formatter);
+            orderDateEnd = end.format(formatter);
+        }
+
+        List<Map<String, Object>> statisticsData =
+                baseMapper.selectRegionOrderStatisticsData(provinceCode, cityCode, orderDateBegin, orderDateEnd);
+
+        List<Map<String, Object>> districtToAmountData = new ArrayList<>();
+        List<Map<String, Object>> districtToNumData = new ArrayList<>();
+        for (Map<String, Object> item : statisticsData) {
+            String name = item.get("district_name") == null ? "未知区域" : String.valueOf(item.get("district_name"));
+            Map<String, Object> amountItem = new HashMap<>();
+            amountItem.put("name", name);
+            amountItem.put("value", item.get("order_amount") == null ? 0D : ((Number) item.get("order_amount")).doubleValue());
+            districtToAmountData.add(amountItem);
+
+            Map<String, Object> numItem = new HashMap<>();
+            numItem.put("name", name);
+            numItem.put("value", item.get("order_num") == null ? 0L : ((Number) item.get("order_num")).longValue());
+            districtToNumData.add(numItem);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("districtToAmountData", districtToAmountData);
+        result.put("districtToNumData", districtToNumData);
+        return result;
+    }
+
     //修改订单状态
     @Override
     public void processPaySucess(String orderNo) {

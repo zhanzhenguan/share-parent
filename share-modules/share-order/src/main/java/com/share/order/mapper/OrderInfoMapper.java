@@ -34,6 +34,20 @@ public interface OrderInfoMapper extends BaseMapper<OrderInfo>
     List<Map<String, Object>> selectOrderStatisticsData(@Param("orderDateBegin") String orderDateBegin,
                                                         @Param("orderDateEnd") String orderDateEnd);
 
+    /**
+     * 按区域（区县）统计订单数量与金额
+     *
+     * @param provinceCode   省份编码
+     * @param cityCode       城市编码
+     * @param orderDateBegin 开始日期
+     * @param orderDateEnd   结束日期
+     * @return 各区县订单统计
+     */
+    List<Map<String, Object>> selectRegionOrderStatisticsData(@Param("provinceCode") String provinceCode,
+                                                              @Param("cityCode") String cityCode,
+                                                              @Param("orderDateBegin") String orderDateBegin,
+                                                              @Param("orderDateEnd") String orderDateEnd);
+
     //传递过来sql语句，根据sql语句查询数据库得到报表数据
     List<Map<String, Object>> getOrderCount(String sql);
 }
