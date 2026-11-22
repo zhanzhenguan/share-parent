@@ -12,7 +12,6 @@ import com.share.rules.domain.vo.FeeRuleResponse;
 import com.share.rules.mapper.FeeRuleMapper;
 import com.share.rules.service.IFeeRuleService;
 import lombok.extern.slf4j.Slf4j;
-import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,14 +34,10 @@ public class FeeRuleServiceImpl extends ServiceImpl<FeeRuleMapper, FeeRule> impl
     @Autowired
     private FeeRuleMapper feeRuleMapper;
 
-    @Autowired
-    private KieContainer kieContainer;
-
     //计算订单费用
     @Override
     public FeeRuleResponseVo calculateOrderFee(FeeRuleRequestForm feeRuleRequestForm) {
         //1 开启会话
-//        KieSession kieSession = kieContainer.newKieSession();
         //获取最新订单费用规则
         FeeRule feeRule = feeRuleMapper.selectById(feeRuleRequestForm.getFeeRuleId());
         KieSession kieSession = DroolsHelper.loadForRule(feeRule.getRule());

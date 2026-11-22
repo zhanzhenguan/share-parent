@@ -76,7 +76,7 @@ public class MapServiceImpl implements IMapService {
 
         //返回第一条最佳线路
         JSONObject result = response.getJSONObject("result");
-        System.out.println(result.toJSONString());
+        log.debug("地图解析结果：{}", result.toJSONString());
         return result.getJSONObject("location");
     }
 }

@@ -17,6 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * 设备对外接口
+ *
+ * @author share
+ */
 @Tag(name = "站点接口管理")
 @RestController
 @RequestMapping("/device")
@@ -25,10 +30,12 @@ public class DeviceApiController extends BaseController {
     @Autowired
     private IDeviceService deviceService;
 
-    //扫码充电接口
+    /**
+     * 扫码充电接口
+     */
     @Operation(summary = "扫码充电")
     @RequiresLogin
-    @GetMapping("scanCharge/{cabinetNo}")
+    @GetMapping("/scanCharge/{cabinetNo}")
     public AjaxResult scanCharge(@PathVariable String cabinetNo) {
         ScanChargeVo scanChargeVo = deviceService.scanCharge(cabinetNo);
         return success(scanChargeVo);

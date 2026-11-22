@@ -71,7 +71,7 @@ public class WxPayServiceImpl implements IWxPayService {
         //获取用户信息
         Payer payer = new Payer();
         //远程调用
-        R<UserInfo> userInfoR = remoteUserService.getInfo(paymentInfo.getUserId());
+        R<UserInfo> userInfoR = remoteUserService.getInfo(paymentInfo.getUserId(), SecurityConstants.INNER);
         UserInfo userInfo = userInfoR.getData();
         if(userInfo == null) {
             throw new ServiceException("用户不存在");

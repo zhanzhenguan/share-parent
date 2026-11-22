@@ -62,15 +62,23 @@ public class OrderReceiver {
             value = @Queue(value = MqConst.QUEUE_SUBMIT_ORDER, durable = "true"),
             key = MqConst.ROUTING_SUBMIT_ORDER
     ))
-    public void createOrder(String content, Message message , Channel channel) {
+    public void createOrder(String content, Message message , Channel channel) throws IOException {
         //把content转换对象
         SubmitOrderVo submitOrderVo = JSONObject.parseObject(content, SubmitOrderVo.class);
-        //TODO 防止重复请求 setnx实现
+        //重复消费
+        String messageNo = submitOrderVo.getMessageNo();
+        String key = "order:submitorder:" + messageNo;
+        Boolean ifAbsent = redisTemplate.opsForValue().setIfAbsent(key, messageNo, 1, TimeUnit.HOURS);
+        if (!ifAbsent) {
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+            return;
+        }
         try {
             //调用service方法创建订单
             orderInfoService.saveOrder(submitOrderVo);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            redisTemplate.delete(key);
             throw new RuntimeException(e);
         }
     }

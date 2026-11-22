@@ -3,6 +3,7 @@ package com.share.device.service.impl;
 import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.share.common.core.constant.SecurityConstants;
 import com.share.common.core.context.SecurityContextHolder;
 import com.share.common.core.domain.R;
 import com.share.common.core.exception.ServiceException;
@@ -137,7 +138,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
             //获取站点规则数据
             Long feeRuleId = station.getFeeRuleId();
-            R<FeeRule> feeRuleResult = remoteFeeRuleService.getFeeRule(feeRuleId);
+            R<FeeRule> feeRuleResult = remoteFeeRuleService.getFeeRule(feeRuleId, SecurityConstants.INNER);
             FeeRule feeRule = feeRuleResult.getData();
             String description = feeRule.getDescription();
             stationVo.setFeeRule(description);
@@ -176,7 +177,7 @@ public class DeviceServiceImpl implements IDeviceService {
         }
 
         // 获取费用规则
-        FeeRule feeRule = remoteFeeRuleService.getFeeRule(station.getFeeRuleId()).getData();
+        FeeRule feeRule = remoteFeeRuleService.getFeeRule(station.getFeeRuleId(), SecurityConstants.INNER).getData();
         stationVo.setFeeRule(feeRule.getDescription());
 
         //返回数据
@@ -191,7 +192,7 @@ public class DeviceServiceImpl implements IDeviceService {
     public ScanChargeVo scanCharge(String cabinetNo) {
         //1 远程调用：根据当前登录用户id查询用户信息，
         // 从用户信息获取是否支持免押金充电
-        R<UserInfo> userInfoR = remoteUserService.getInfo(SecurityContextHolder.getUserId());
+        R<UserInfo> userInfoR = remoteUserService.getInfo(SecurityContextHolder.getUserId(), SecurityConstants.INNER);
         UserInfo userInfo = userInfoR.getData();
         //判断
         if(userInfo == null) {
@@ -204,7 +205,7 @@ public class DeviceServiceImpl implements IDeviceService {
 
         ScanChargeVo scanChargeVo = new ScanChargeVo();
         //2 远程调用：判断用户是否有未完成订单
-        R<OrderInfo> orderInfoR = remoteOrderInfoService.getNoFinishOrder(SecurityUtils.getUserId());
+        R<OrderInfo> orderInfoR = remoteOrderInfoService.getNoFinishOrder(SecurityUtils.getUserId(), SecurityConstants.INNER);
         OrderInfo orderInfo = orderInfoR.getData();
         if(orderInfo != null) {//有 未完成订单
             String status = userInfo.getStatus();

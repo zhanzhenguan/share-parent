@@ -1,5 +1,6 @@
 package com.share.auth.service;
 
+import com.share.common.core.constant.SecurityConstants;
 import com.share.common.core.domain.R;
 import com.share.common.core.exception.ServiceException;
 import com.share.common.core.utils.StringUtils;
@@ -23,7 +24,7 @@ public class H5LoginService {
         }
 
         //2 拿着code进行远程调用完成登录，返回userInfo
-        R<UserInfo> userInfoR = remoteUserService.wxLogin(code);
+        R<UserInfo> userInfoR = remoteUserService.wxLogin(code, SecurityConstants.INNER);
         UserInfo userInfo = userInfoR.getData();
 
         //3 判断返回userInfo是否为空

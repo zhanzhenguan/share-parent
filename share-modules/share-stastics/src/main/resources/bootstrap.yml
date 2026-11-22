@@ -1,6 +1,8 @@
+# Tomcat
 server:
   port: 9505
 
+# Spring
 spring:
   application:
     # 应用名称
@@ -9,7 +11,7 @@ spring:
     # 环境配置
     active: dev
   main:
-    allow-bean-definition-overriding: true #当遇到同样名字的时候，是否允许覆盖注册
+    allow-bean-definition-overriding: true
   cloud:
     nacos:
       # ★ 全局账号（2022.x 支持，config/discovery 共用）
@@ -19,10 +21,12 @@ spring:
         # 服务注册地址
         server-addr: 192.168.136.128:8848
         namespace: 9a99e50e-3a2b-4d16-a923-04ef33464f63
-#  ai:
-#    ollama:
-#      base-url: http://localhost:11434
-#      chat:
-#        options:
-#          model: deepseek-r1:1.5b
-#          temperature: 0.7
+      config:
+        # 配置中心地址
+        server-addr: 192.168.136.128:8848
+        namespace: 9a99e50e-3a2b-4d16-a923-04ef33464f63
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        shared-configs:
+          - application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}

@@ -1,10 +1,12 @@
 package com.share.payment.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 
+@Slf4j
 public class RequestUtils {
     /**
      * 将通知参数转化为字符串
@@ -30,7 +32,7 @@ public class RequestUtils {
                 try {
                     br.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("关闭请求流失败", e);
                 }
             }
         }

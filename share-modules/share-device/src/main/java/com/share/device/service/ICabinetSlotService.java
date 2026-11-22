@@ -15,4 +15,12 @@ public interface ICabinetSlotService extends IService<CabinetSlot>
 
     CabinetSlot getBtSlotNo(Long cabinetId, String slotNo);
 
+    /**
+     * 查询柜机插槽列表
+     *
+     * @param cabinetSlot 柜机插槽查询条件
+     * @return 柜机插槽集合
+     */
+    List<CabinetSlot> selectCabinetSlotList(CabinetSlot cabinetSlot);
+
 }

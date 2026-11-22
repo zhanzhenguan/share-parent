@@ -10,12 +10,20 @@ import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.share.common.core.context.SecurityContextHolder;
+import com.share.common.core.utils.ServletUtils;
+import com.share.common.core.utils.StringUtils;
+import com.share.common.core.utils.ip.IpUtils;
+import com.share.common.security.service.TokenService;
+import com.share.common.security.utils.SecurityUtils;
 import com.share.user.domain.UserCountVo;
 import com.share.user.domain.UserInfo;
+import com.share.user.domain.UserLoginLog;
+import com.share.user.service.IUserLoginLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.share.user.mapper.UserInfoMapper;
 import com.share.user.service.IUserInfoService;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 用户Service业务层处理
@@ -23,6 +31,7 @@ import com.share.user.service.IUserInfoService;
  * @author atguigu
  * @date 2025-02-17
  */
+@Slf4j
 @Service
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements IUserInfoService
 {
@@ -31,6 +40,12 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
     @Autowired
     private WxMaService wxMaService;
+
+    @Autowired
+    private TokenService tokenService;
+
+    @Autowired
+    private IUserLoginLogService userLoginLogService;
 
     /**
      * 查询用户列表
@@ -67,7 +82,19 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 userInfoMapper.insert(userInfo);
             }
 
-            //3 返回uerInfo用户信息
+            //3 记录登录日志（日志写入失败不影响登录）
+            try {
+                UserLoginLog loginLog = new UserLoginLog();
+                loginLog.setUserId(userInfo.getId());
+                loginLog.setIpaddr(getClientIp());
+                loginLog.setStatus(0);
+                loginLog.setMsg("微信登录成功");
+                userLoginLogService.save(loginLog);
+            } catch (Exception e) {
+                log.error("记录微信登录日志失败，userId={}", userInfo.getId(), e);
+            }
+
+            //4 返回uerInfo用户信息
             return userInfo;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -76,8 +103,22 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
     @Override
     public UserInfo wxLogout(String code) {
-
+        //删除 Redis 中的登录信息，使当前 token 立即失效
+        String token = ServletUtils.getRequest() == null ? null : SecurityUtils.getToken();
+        if (StringUtils.isNotEmpty(token)) {
+            tokenService.delLoginUser(token);
+        }
         return null;
+    }
+
+    /**
+     * 获取客户端IP
+     */
+    private String getClientIp() {
+        if (ServletUtils.getRequest() == null) {
+            return "unknown";
+        }
+        return IpUtils.getIpAddr(ServletUtils.getRequest());
     }
 
     //免押金

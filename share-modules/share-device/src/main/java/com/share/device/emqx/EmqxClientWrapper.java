@@ -56,8 +56,7 @@ public class EmqxClientWrapper {
             client.subscribe(topics);
             return true;
         } catch (MqttException e) {
-            log.info("连接失败");
-            e.printStackTrace();
+            log.error("MQTT连接失败", e);
         }
         return false;
     }
@@ -85,8 +84,7 @@ public class EmqxClientWrapper {
             message.setQos(2);
             client.publish(topic, message);
         } catch (MqttException e) {
-            log.error("消息发布失败");
-            e.printStackTrace();
+            log.error("消息发布失败", e);
         }
     }
 

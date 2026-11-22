@@ -1,7 +1,9 @@
 package com.share.device.emqx;
 
 import com.alibaba.fastjson2.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ProtocolConvertUtil {
 
 
@@ -30,7 +32,7 @@ public class ProtocolConvertUtil {
         }
 
         // 输出 JSON 字符串
-        System.out.println(jsonObject.toString());
+        log.debug("协议转换结果：{}", jsonObject);
         return jsonObject;
     }
 
@@ -52,7 +54,7 @@ public class ProtocolConvertUtil {
         }
 
         // 输出结果字符串
-        System.out.println(result.toString());
+        log.debug("协议转换结果：{}", result);
         return result.toString();
     }
 }

@@ -7,6 +7,7 @@ import com.share.common.core.constant.SecurityConstants;
 import com.share.common.core.domain.R;
 import com.share.common.core.exception.ServiceException;
 import com.share.common.core.utils.StringUtils;
+import com.share.common.core.utils.SqlUtils;
 import com.share.common.security.utils.SecurityUtils;
 import com.share.order.domain.*;
 import com.share.order.mapper.OrderBillMapper;
@@ -28,6 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -54,6 +57,60 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         return baseMapper.selectOne(new LambdaQueryWrapper<OrderInfo>().eq(OrderInfo::getOrderNo, orderNo));
     }
 
+    /**
+     * 查询订单列表
+     *
+     * @param orderInfo 订单查询条件
+     * @return 订单集合
+     */
+    @Override
+    public List<OrderInfo> selectOrderInfoList(OrderInfo orderInfo) {
+        return baseMapper.selectOrderInfoList(orderInfo);
+    }
+
+    /**
+     * 查询订单统计图表数据
+     *
+     * @param orderDateBegin 开始日期
+     * @param orderDateEnd   结束日期
+     * @return 统计图表数据
+     */
+    @Override
+    public Map<String, Object> getOrderStatisticsData(String orderDateBegin, String orderDateEnd) {
+        //未指定日期范围时，默认查询最近7天
+        if (StringUtils.isEmpty(orderDateBegin) || StringUtils.isEmpty(orderDateEnd)) {
+            LocalDate end = LocalDate.now();
+            LocalDate begin = end.minusDays(6);
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+            orderDateBegin = begin.format(formatter);
+            orderDateEnd = end.format(formatter);
+        }
+
+        List<Map<String, Object>> statisticsData = baseMapper.selectOrderStatisticsData(orderDateBegin, orderDateEnd);
+
+        List<String> orderDateList = new ArrayList<>();
+        List<Long> orderDateNumList = new ArrayList<>();
+        List<Double> orderDateAmountList = new ArrayList<>();
+        for (Map<String, Object> item : statisticsData) {
+            orderDateList.add(String.valueOf(item.get("order_date")));
+            orderDateNumList.add(item.get("order_num") == null ? 0L : ((Number) item.get("order_num")).longValue());
+            orderDateAmountList.add(item.get("order_amount") == null ? 0D : ((Number) item.get("order_amount")).doubleValue());
+        }
+
+        Map<String, Object> orderDateToNumData = new HashMap<>();
+        orderDateToNumData.put("orderDateList", orderDateList);
+        orderDateToNumData.put("orderDateNumList", orderDateNumList);
+
+        Map<String, Object> orderDateToAmountData = new HashMap<>();
+        orderDateToAmountData.put("orderDateList", orderDateList);
+        orderDateToAmountData.put("orderDateAmountList", orderDateAmountList);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("orderDateToNumData", orderDateToNumData);
+        result.put("orderDateToAmountData", orderDateToAmountData);
+        return result;
+    }
+
     //修改订单状态
     @Override
     public void processPaySucess(String orderNo) {
@@ -71,6 +128,10 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     //传递过来sql语句，根据sql语句查询数据库得到报表数据
     @Override
     public Map<String, Object> getOrderCount(String sql) {
+        //最后一道防线：仅允许执行安全的单条查询语句
+        if (!SqlUtils.isSafeSelect(sql)) {
+            throw new ServiceException("SQL语句不合法，仅支持单条查询语句");
+        }
         //调用mapper方法执行sql语句
         List<Map<String,Object>> list = baseMapper.getOrderCount(sql);
 
@@ -116,14 +177,14 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderInfo.setStartStationName(submitOrderVo.getStartStationName());
         orderInfo.setStartCabinetNo(submitOrderVo.getStartCabinetNo());
         // 费用规则
-        FeeRule feeRule = remoteFeeRuleService.getFeeRule(submitOrderVo.getFeeRuleId()).getData();
+        FeeRule feeRule = remoteFeeRuleService.getFeeRule(submitOrderVo.getFeeRuleId(), SecurityConstants.INNER).getData();
         orderInfo.setFeeRuleId(submitOrderVo.getFeeRuleId());
         orderInfo.setFeeRule(feeRule.getDescription());
         orderInfo.setStatus("0");
         orderInfo.setCreateTime(new Date());
         orderInfo.setCreateBy(SecurityUtils.getUsername());
         //用户昵称
-        UserInfo userInfo = remoteUserInfoService.getInfo(orderInfo.getUserId()).getData();
+        UserInfo userInfo = remoteUserInfoService.getInfo(orderInfo.getUserId(), SecurityConstants.INNER).getData();
         //orderInfo.setNick(userInfo.getNickname());
 
         baseMapper.insert(orderInfo);
@@ -162,7 +223,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         feeRuleRequestForm.setDuration(duration);
         feeRuleRequestForm.setFeeRuleId(orderInfo.getFeeRuleId());
         //远程调用
-        R<FeeRuleResponseVo> feeRuleResponseVoR = remoteFeeRuleService.calculateOrderFee(feeRuleRequestForm);
+        R<FeeRuleResponseVo> feeRuleResponseVoR = remoteFeeRuleService.calculateOrderFee(feeRuleRequestForm, SecurityConstants.INNER);
         FeeRuleResponseVo feeRuleResponseVo = feeRuleResponseVoR.getData();
 
         //设置费用
@@ -221,7 +282,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                     feeRuleRequestForm.setDuration(minutes);
                     feeRuleRequestForm.setFeeRuleId(orderInfo.getFeeRuleId());
                     R<FeeRuleResponseVo> feeRuleResponseVoR =
-                            remoteFeeRuleService.calculateOrderFee(feeRuleRequestForm);
+                            remoteFeeRuleService.calculateOrderFee(feeRuleRequestForm, SecurityConstants.INNER);
                     FeeRuleResponseVo responseVo = feeRuleResponseVoR.getData();
 
                     //设置到orderInfo里面
@@ -257,7 +318,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
                 FeeRuleRequestForm feeRuleRequestForm = new FeeRuleRequestForm();
                 feeRuleRequestForm.setDuration(minutes);
                 feeRuleRequestForm.setFeeRuleId(orderInfo.getFeeRuleId());
-                R<FeeRuleResponseVo> feeRuleResponseVoR = remoteFeeRuleService.calculateOrderFee(feeRuleRequestForm);
+                R<FeeRuleResponseVo> feeRuleResponseVoR = remoteFeeRuleService.calculateOrderFee(feeRuleRequestForm, SecurityConstants.INNER);
                 FeeRuleResponseVo responseVo = feeRuleResponseVoR.getData();
 
                 //设置到orderInfo里面
@@ -276,7 +337,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         List<OrderBill> orderBillList = orderBillMapper.selectList(new LambdaQueryWrapper<OrderBill>().eq(OrderBill::getOrderId, id));
         orderInfo.setOrderBillList(orderBillList);
 
-        R<UserInfo> userInfoR = remoteUserInfoService.getInfo(orderInfo.getUserId());
+        R<UserInfo> userInfoR = remoteUserInfoService.getInfo(orderInfo.getUserId(), SecurityConstants.INNER);
 
         UserInfo userInfo = userInfoR.getData();
         UserInfoVo userInfoVo = new UserInfoVo();

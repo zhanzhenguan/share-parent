@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.share.order.domain.OrderBill;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * 订单账单Mapper接口
  *
@@ -13,5 +15,11 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface OrderBillMapper extends BaseMapper<OrderBill>
 {
-
+    /**
+     * 查询订单账单列表
+     *
+     * @param orderBill 订单账单查询条件
+     * @return 订单账单集合
+     */
+    List<OrderBill> selectOrderBillList(OrderBill orderBill);
 }

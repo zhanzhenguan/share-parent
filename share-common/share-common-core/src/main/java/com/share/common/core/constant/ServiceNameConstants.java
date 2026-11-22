@@ -23,7 +23,17 @@ public class ServiceNameConstants
     public static final String FILE_SERVICE = "share-file";
 
     /**
-     * 文件服务的serviceid
+     * 用户服务的serviceid
      */
     public static final String SHARE_USER = "share-user";
+
+    /**
+     * 订单服务的serviceid
+     */
+    public static final String SHARE_ORDER = "share-order";
+
+    /**
+     * 规则服务的serviceid
+     */
+    public static final String SHARE_RULE = "share-rule";
 }

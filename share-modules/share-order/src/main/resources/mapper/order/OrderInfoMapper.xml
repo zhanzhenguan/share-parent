@@ -3,7 +3,82 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.share.order.mapper.OrderInfoMapper">
+
+    <resultMap type="com.share.order.domain.OrderInfo" id="OrderInfoResult">
+        <id     property="id"               column="id"                 />
+        <result property="userId"           column="user_id"            />
+        <result property="orderNo"          column="order_no"           />
+        <result property="powerBankNo"      column="power_bank_no"      />
+        <result property="startTime"        column="start_time"         />
+        <result property="startStationId"   column="start_station_id"   />
+        <result property="startStationName" column="start_station_name" />
+        <result property="startCabinetNo"   column="start_cabinet_no"   />
+        <result property="endTime"          column="end_time"           />
+        <result property="endStationId"     column="end_station_id"     />
+        <result property="endStationName"   column="end_station_name"   />
+        <result property="endCabinetNo"     column="end_cabinet_no"     />
+        <result property="duration"         column="duration"           />
+        <result property="feeRuleId"        column="fee_rule_id"        />
+        <result property="feeRule"          column="fee_rule"           />
+        <result property="totalAmount"      column="total_amount"       />
+        <result property="deductAmount"     column="deduct_amount"      />
+        <result property="realAmount"       column="real_amount"        />
+        <result property="payTime"          column="pay_time"           />
+        <result property="transactionId"    column="transaction_id"     />
+        <result property="status"           column="status"             />
+        <result property="createBy"         column="create_by"          />
+        <result property="createTime"       column="create_time"        />
+        <result property="updateBy"         column="update_by"          />
+        <result property="updateTime"       column="update_time"        />
+        <result property="remark"           column="remark"             />
+        <result property="delFlag"          column="del_flag"           />
+    </resultMap>
+
+    <sql id="selectOrderInfoVo">
+        select id, user_id, order_no, power_bank_no, start_time, start_station_id, start_station_name,
+               start_cabinet_no, end_time, end_station_id, end_station_name, end_cabinet_no, duration,
+               fee_rule_id, fee_rule, total_amount, deduct_amount, real_amount, pay_time, transaction_id,
+               status, create_by, create_time, update_by, update_time, remark, del_flag
+        from order_info
+    </sql>
+
+    <select id="selectOrderInfoList" parameterType="com.share.order.domain.OrderInfo" resultMap="OrderInfoResult">
+        <include refid="selectOrderInfoVo"/>
+        <where>
+            del_flag = '0'
+            <if test="userId != null"> and user_id = #{userId}</if>
+            <if test="orderNo != null and orderNo != ''"> and order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="powerBankNo != null and powerBankNo != ''"> and power_bank_no like concat('%', #{powerBankNo}, '%')</if>
+            <if test="startStationId != null"> and start_station_id = #{startStationId}</if>
+            <if test="startCabinetNo != null and startCabinetNo != ''"> and start_cabinet_no = #{startCabinetNo}</if>
+            <if test="endStationId != null"> and end_station_id = #{endStationId}</if>
+            <if test="endCabinetNo != null and endCabinetNo != ''"> and end_cabinet_no = #{endCabinetNo}</if>
+            <if test="feeRuleId != null"> and fee_rule_id = #{feeRuleId}</if>
+            <if test="status != null and status != ''"> and status = #{status}</if>
+            <if test="transactionId != null and transactionId != ''"> and transaction_id = #{transactionId}</if>
+            <if test="params.beginStartTime != null and params.beginStartTime != ''">
+                and start_time &gt;= #{params.beginStartTime}
+            </if>
+            <if test="params.endStartTime != null and params.endStartTime != ''">
+                and start_time &lt;= #{params.endStartTime}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
     <select id="getOrderCount" resultType="hashmap">
         ${sql}
+    </select>
+
+    <select id="selectOrderStatisticsData" resultType="java.util.LinkedHashMap">
+        select date_format(start_time, '%Y-%m-%d') as order_date,
+               count(1)                            as order_num,
+               ifnull(sum(total_amount), 0)        as order_amount
+        from order_info
+        where del_flag = '0'
+          and start_time &gt;= concat(#{orderDateBegin}, ' 00:00:00')
+          and start_time &lt;= concat(#{orderDateEnd}, ' 23:59:59')
+        group by date_format(start_time, '%Y-%m-%d')
+        order by order_date asc
     </select>
 </mapper>

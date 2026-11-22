@@ -2,6 +2,7 @@ package com.share.device.controller;
 
 import com.share.common.core.web.controller.BaseController;
 import com.share.common.core.web.domain.AjaxResult;
+import com.share.common.security.annotation.RequiresPermissions;
 import com.share.device.service.IMapService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +26,7 @@ public class MapController extends BaseController
     private IMapService mapService;
 
     @Operation(summary = "根据经纬度计算详细地址")
+    @RequiresPermissions("map:station:list")
     @GetMapping("/calculateLatLng/{keyword}")
     public AjaxResult calculateLatLng(@PathVariable String keyword)
     {

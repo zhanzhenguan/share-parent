@@ -11,12 +11,19 @@ import com.wechat.pay.java.service.payments.model.Transaction;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 微信支付接口
+ *
+ * @author share
+ */
+@Slf4j
 @Tag(name = "微信支付接口")
 @RestController
 @RequestMapping("/wxPay")
@@ -54,7 +61,7 @@ public class WxPayApiController extends BaseController {
             result.put("message", "成功");
             return result;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("微信支付回调处理失败", e);
         }
 
         //返回失败

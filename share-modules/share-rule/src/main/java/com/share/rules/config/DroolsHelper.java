@@ -7,13 +7,27 @@ import org.kie.api.builder.Message;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * @author: zzg
  * @date: 2026年11月19日  00:50
  * @version: 1.0
  */
 public class DroolsHelper {
+
+    /**
+     * 规则内容 -> KieContainer 缓存，避免每次计费重复编译 DRL
+     */
+    private static final Map<String, KieContainer> CONTAINER_CACHE = new ConcurrentHashMap<>();
+
     public static KieSession loadForRule(String drlStr) {
+        KieContainer kieContainer = CONTAINER_CACHE.computeIfAbsent(drlStr, DroolsHelper::buildContainer);
+        return kieContainer.newKieSession();
+    }
+
+    private static KieContainer buildContainer(String drlStr) {
         KieServices kieServices = KieServices.Factory.get();
 
         KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
@@ -27,7 +41,6 @@ public class DroolsHelper {
             throw new RuntimeException("Build Errors:\n" + kieBuilder.getResults().toString());
         }
 
-        KieContainer kieContainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
-        return kieContainer.newKieSession();
+        return kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
     }
 }

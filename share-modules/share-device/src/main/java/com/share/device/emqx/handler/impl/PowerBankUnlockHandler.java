@@ -128,7 +128,7 @@ public class PowerBankUnlockHandler implements MassageHandler {
         cabinet.setUpdateTime(new Date());
         cabinetService.updateById(cabinet);
 
-        //TODO 10 使用RabbitMQ异步生成订单
+        //10 使用RabbitMQ异步生成订单
         //封装消息
         SubmitOrderVo submitOrderVo = new SubmitOrderVo();
         submitOrderVo.setMessageNo(messageNo);

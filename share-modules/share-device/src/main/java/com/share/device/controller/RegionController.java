@@ -2,6 +2,7 @@ package com.share.device.controller;
 
 import com.share.common.core.web.controller.BaseController;
 import com.share.common.core.web.domain.AjaxResult;
+import com.share.common.security.annotation.RequiresPermissions;
 import com.share.device.service.IRegionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +21,7 @@ public class RegionController extends BaseController {
     private IRegionService regionService;
 
     @Operation(summary = "根据上级code获取下级数据列表")
+    @RequiresPermissions("device:category:list")
     @GetMapping(value = "/treeSelect/{code}")
     public AjaxResult treeSelect(@PathVariable String code) {
         return success(regionService.treeSelect(code));

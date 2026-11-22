@@ -3,6 +3,7 @@ package com.share.device.controller;
 import com.share.common.core.web.controller.BaseController;
 import com.share.common.core.web.domain.AjaxResult;
 import com.share.common.core.web.page.TableDataInfo;
+import com.share.common.security.annotation.RequiresPermissions;
 import com.share.device.domain.Cabinet;
 import com.share.device.service.ICabinetService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +23,7 @@ public class CabinetController extends BaseController {
     private ICabinetService cabinetService;
 
     @Operation(summary = "搜索未使用柜机")
+    @RequiresPermissions("device:cabinet:query")
     @GetMapping(value = "/searchNoUseList/{keyword}")
     public AjaxResult searchNoUseList(@PathVariable String keyword)
     {
@@ -30,6 +32,7 @@ public class CabinetController extends BaseController {
 
     //删除
     @Operation(summary = "删除")
+    @RequiresPermissions("device:cabinet:remove")
     @DeleteMapping("{ids}")
     public AjaxResult delete(@PathVariable Long[] ids) {
         boolean flag = cabinetService.removeBatchByIds(Arrays.asList(ids));
@@ -39,6 +42,7 @@ public class CabinetController extends BaseController {
 
     //修改
     @Operation(summary = "修改")
+    @RequiresPermissions("device:cabinet:edit")
     @PutMapping
     public AjaxResult update(@RequestBody Cabinet cabinet) {
         boolean flag = cabinetService.updateById(cabinet);
@@ -48,6 +52,7 @@ public class CabinetController extends BaseController {
 
     //添加
     @Operation(summary = "添加")
+    @RequiresPermissions("device:cabinet:add")
     @PostMapping
     public AjaxResult add(@RequestBody Cabinet cabinet) {
         boolean flag = cabinetService.save(cabinet);
@@ -57,6 +62,7 @@ public class CabinetController extends BaseController {
 
     //根据id查询详情
     @Operation(summary = "根据id查询详情")
+    @RequiresPermissions("device:cabinet:query")
     @GetMapping("{id}")
     public AjaxResult getInfo(@PathVariable Long id) {
         Cabinet cabinet = cabinetService.getById(id);
@@ -66,6 +72,7 @@ public class CabinetController extends BaseController {
 
     //分页查询
     @Operation(summary = "查询充电宝柜机列表")
+    @RequiresPermissions("device:cabinet:list")
     @GetMapping("/list")
     public TableDataInfo list(Cabinet cabinet) {
         //设置分页参数
@@ -78,6 +85,7 @@ public class CabinetController extends BaseController {
 
 
     @Operation(summary = "获取充电宝柜机全部详细信息")
+    @RequiresPermissions("device:cabinet:query")
     @GetMapping(value = "/getAllInfo/{id}")
     public AjaxResult getAllInfo(@PathVariable("id") Long id)
     {

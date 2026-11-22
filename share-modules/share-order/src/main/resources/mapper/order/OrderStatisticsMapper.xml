@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.share.order.mapper.OrderStatisticsMapper">
+
+    <resultMap type="com.share.order.domain.OrderStatistics" id="OrderStatisticsResult">
+        <id     property="id"          column="id"           />
+        <result property="stationId"   column="station_id"   />
+        <result property="orderDate"   column="order_date"   />
+        <result property="totalAmount" column="total_amount" />
+        <result property="totalNum"    column="total_num"    />
+        <result property="createTime"  column="create_time"  />
+        <result property="updateTime"  column="update_time"  />
+    </resultMap>
+
+    <select id="selectOrderStatisticsList" parameterType="com.share.order.domain.OrderStatistics" resultMap="OrderStatisticsResult">
+        select id, station_id, order_date, total_amount, total_num, create_time, update_time
+        from order_statistics
+        <where>
+            <if test="stationId != null"> and station_id = #{stationId}</if>
+            <if test="orderDate != null"> and order_date = #{orderDate}</if>
+            <if test="params.beginOrderDate != null and params.beginOrderDate != ''">
+                and order_date &gt;= #{params.beginOrderDate}
+            </if>
+            <if test="params.endOrderDate != null and params.endOrderDate != ''">
+                and order_date &lt;= #{params.endOrderDate}
+            </if>
+        </where>
+        order by order_date desc, id desc
+    </select>
+
+    <delete id="deleteOrderStatisticsByRange">
+        delete from order_statistics
+        where order_date &gt;= #{orderDateBegin}
+          and order_date &lt;= #{orderDateEnd}
+    </delete>
+
+    <insert id="insertOrderStatisticsByRange">
+        insert into order_statistics (station_id, order_date, total_amount, total_num, create_time, update_time)
+        select start_station_id,
+               date(start_time),
+               ifnull(sum(total_amount), 0),
+               count(1),
+               now(),
+               now()
+        from order_info
+        where del_flag = '0'
+          and start_station_id is not null
+          and start_time &gt;= concat(#{orderDateBegin}, ' 00:00:00')
+          and start_time &lt;= concat(#{orderDateEnd}, ' 23:59:59')
+        group by start_station_id, date(start_time)
+    </insert>
+</mapper>

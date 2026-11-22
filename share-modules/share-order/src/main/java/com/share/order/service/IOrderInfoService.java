@@ -19,6 +19,23 @@ public interface IOrderInfoService extends IService<OrderInfo> {
     //获取未完成订单
     OrderInfo getNoFinishOrder(Long userId);
 
+    /**
+     * 查询订单列表
+     *
+     * @param orderInfo 订单查询条件
+     * @return 订单集合
+     */
+    List<OrderInfo> selectOrderInfoList(OrderInfo orderInfo);
+
+    /**
+     * 查询订单统计图表数据
+     *
+     * @param orderDateBegin 开始日期
+     * @param orderDateEnd   结束日期
+     * @return 统计图表数据
+     */
+    Map<String, Object> getOrderStatisticsData(String orderDateBegin, String orderDateEnd);
+
     Long saveOrder(SubmitOrderVo submitOrderVo);
 
     void endOrder(EndOrderVo endOrderVo);

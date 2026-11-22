@@ -2,7 +2,9 @@ package com.share.payment.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.share.common.core.constant.SecurityConstants;
 import com.share.common.core.domain.R;
+import com.share.common.core.utils.StringUtils;
 import com.share.common.rabbit.constant.MqConst;
 import com.share.common.rabbit.service.RabbitService;
 import com.share.order.api.RemoteOrderInfoService;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class PaymentInfoServiceImpl extends ServiceImpl<PaymentInfoMapper, PaymentInfo> implements PaymentService {
@@ -34,7 +37,7 @@ public class PaymentInfoServiceImpl extends ServiceImpl<PaymentInfoMapper, Payme
         //2 如果支付记录不存在，进行添加
         if(paymentInfo == null) {
             //3 远程调用：根据订单编号查询订单数据
-            R<OrderInfo> result = remoteOrderInfoService.getByOrderNo(orderNo);
+            R<OrderInfo> result = remoteOrderInfoService.getByOrderNo(orderNo, SecurityConstants.INNER);
             OrderInfo orderInfo = result.getData();
 
             //添加数据
@@ -75,5 +78,16 @@ public class PaymentInfoServiceImpl extends ServiceImpl<PaymentInfoMapper, Payme
         rabbitService.sendMessage(MqConst.EXCHANGE_PAYMENT_PAY,
                                   MqConst.ROUTING_PAYMENT_PAY,
                                   paymentInfo.getOrderNo());
+    }
+
+    /**
+     * 查询付款信息列表
+     *
+     * @param paymentInfo 付款信息查询条件
+     * @return 付款信息集合
+     */
+    @Override
+    public List<PaymentInfo> selectPaymentInfoList(PaymentInfo paymentInfo) {
+        return baseMapper.selectPaymentInfoList(paymentInfo);
     }
 }

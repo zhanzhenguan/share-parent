@@ -1,31 +1,29 @@
 package com.share.rules.controller;
 
-import com.alibaba.fastjson2.JSON;
-import com.share.common.core.domain.R;
+import java.util.Arrays;
+import java.util.List;
+
+import com.share.common.core.utils.poi.ExcelUtil;
+import com.share.common.core.web.controller.BaseController;
+import com.share.common.core.web.domain.AjaxResult;
+import com.share.common.core.web.page.TableDataInfo;
+import com.share.common.log.annotation.Log;
+import com.share.common.log.enums.BusinessType;
+import com.share.common.security.annotation.RequiresPermissions;
 import com.share.rule.domain.FeeRule;
-import com.share.rule.domain.FeeRuleRequestForm;
-import com.share.rule.domain.FeeRuleResponseVo;
+import com.share.rules.service.IFeeRuleService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.share.common.security.annotation.RequiresPermissions;
-import com.share.rules.service.IFeeRuleService;
-import com.share.common.core.web.controller.BaseController;
-import com.share.common.core.web.domain.AjaxResult;
-import com.share.common.core.utils.poi.ExcelUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import com.share.common.core.web.page.TableDataInfo;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * 费用规则Controller
@@ -33,7 +31,7 @@ import java.util.List;
  * @author atguigu
  * @date 2024-10-25
  */
-@Tag(name = "费用规则接口管理")
+@Tag(name = "费用规则管理")
 @RestController
 @RequestMapping("/feeRule")
 public class FeeRuleController extends BaseController
@@ -45,6 +43,7 @@ public class FeeRuleController extends BaseController
      * 查询费用规则列表
      */
     @Operation(summary = "查询费用规则列表")
+    @RequiresPermissions("rule:feeRule:list")
     @GetMapping("/list")
     public TableDataInfo list(FeeRule feeRule)
     {
@@ -54,9 +53,24 @@ public class FeeRuleController extends BaseController
     }
 
     /**
+     * 导出费用规则列表
+     */
+    @Operation(summary = "导出费用规则列表")
+    @RequiresPermissions("rule:feeRule:export")
+    @Log(title = "费用规则", businessType = BusinessType.EXPORT)
+    @PostMapping("/export")
+    public void export(HttpServletResponse response, FeeRule feeRule)
+    {
+        List<FeeRule> list = feeRuleService.selectFeeRuleList(feeRule);
+        ExcelUtil<FeeRule> util = new ExcelUtil<FeeRule>(FeeRule.class);
+        util.exportExcel(response, list, "费用规则数据");
+    }
+
+    /**
      * 获取费用规则详细信息
      */
     @Operation(summary = "获取费用规则详细信息")
+    @RequiresPermissions("rule:feeRule:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
@@ -67,6 +81,8 @@ public class FeeRuleController extends BaseController
      * 新增费用规则
      */
     @Operation(summary = "新增费用规则")
+    @RequiresPermissions("rule:feeRule:add")
+    @Log(title = "费用规则", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody FeeRule feeRule)
     {
@@ -77,24 +93,23 @@ public class FeeRuleController extends BaseController
      * 修改费用规则
      */
     @Operation(summary = "修改费用规则")
+    @RequiresPermissions("rule:feeRule:edit")
+    @Log(title = "费用规则", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody FeeRule feeRule)
     {
-        //return toAjax(feeRuleService.updateById(feeRule));
-        System.out.println(JSON.toJSONString(feeRule));
-        return toAjax(1);
+        return toAjax(feeRuleService.updateById(feeRule));
     }
 
     /**
      * 删除费用规则
      */
     @Operation(summary = "删除费用规则")
+    @RequiresPermissions("rule:feeRule:remove")
+    @Log(title = "费用规则", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(feeRuleService.removeBatchByIds(Arrays.asList(ids)));
     }
-
-
 }
-

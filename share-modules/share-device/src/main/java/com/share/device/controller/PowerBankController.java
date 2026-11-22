@@ -3,6 +3,7 @@ package com.share.device.controller;
 import com.share.common.core.web.controller.BaseController;
 import com.share.common.core.web.domain.AjaxResult;
 import com.share.common.core.web.page.TableDataInfo;
+import com.share.common.security.annotation.RequiresPermissions;
 import com.share.common.security.utils.SecurityUtils;
 import com.share.device.domain.PowerBank;
 import com.share.device.service.IPowerBankService;
@@ -25,6 +26,7 @@ public class PowerBankController extends BaseController {
 
     //分页查询
     @Operation(summary = "查询充电宝列表")
+    @RequiresPermissions("device:powerBank:list")
     @GetMapping("/list")
     public TableDataInfo list(PowerBank powerBank) {
         //设置分页参数
@@ -36,6 +38,7 @@ public class PowerBankController extends BaseController {
 
     //根据id查询详情数据
     @Operation(summary = "获取充电宝详细信息")
+    @RequiresPermissions("device:powerBank:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
@@ -44,6 +47,7 @@ public class PowerBankController extends BaseController {
 
     //添加
     @Operation(summary = "添加")
+    @RequiresPermissions("device:powerBank:add")
     @PostMapping
     public AjaxResult add(@RequestBody PowerBank powerBank) {
         //1 设置相关数据值
@@ -58,6 +62,7 @@ public class PowerBankController extends BaseController {
 
     //修改
     @Operation(summary = "修改")
+    @RequiresPermissions("device:powerBank:edit")
     @PutMapping
     public AjaxResult update(@RequestBody PowerBank powerBank) {
         //设置相关数据
@@ -70,6 +75,7 @@ public class PowerBankController extends BaseController {
 
     //删除
     @Operation(summary = "删除充电宝")
+    @RequiresPermissions("device:powerBank:remove")
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {

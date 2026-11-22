@@ -3,6 +3,7 @@ package com.share.device.controller;
 import com.share.common.core.web.controller.BaseController;
 import com.share.common.core.web.domain.AjaxResult;
 import com.share.common.core.web.page.TableDataInfo;
+import com.share.common.security.annotation.RequiresPermissions;
 import com.share.device.domain.Station;
 import com.share.device.service.IStationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +24,7 @@ public class StationController extends BaseController {
 
     //分页查询
     @Operation(summary = "查询站点列表")
+    @RequiresPermissions("device:station:list")
     @GetMapping("/list")
     public TableDataInfo list(Station station) {
         //设置分页参数
@@ -35,6 +37,7 @@ public class StationController extends BaseController {
 
     //添加
     @Operation(summary = "新增站点")
+    @RequiresPermissions("device:station:add")
     @PostMapping
     public AjaxResult add(@RequestBody Station station) {
         return toAjax(stationService.saveStation(station));
@@ -42,12 +45,14 @@ public class StationController extends BaseController {
 
     //修改
     @Operation(summary = "修改站点")
+    @RequiresPermissions("device:station:edit")
     @PutMapping
     public AjaxResult edit(@RequestBody Station station) {
         return toAjax(stationService.updateStation(station));
     }
 
     @Operation(summary = "更新初始化数据")
+    @RequiresPermissions("device:station:edit")
     @GetMapping("/updateData")
     public AjaxResult updateData()
     {
@@ -57,6 +62,7 @@ public class StationController extends BaseController {
 
 
     @Operation(summary = "获取站点详细信息")
+    @RequiresPermissions("device:station:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
@@ -64,6 +70,7 @@ public class StationController extends BaseController {
     }
 
     @Operation(summary = "删除站点")
+    @RequiresPermissions("device:station:remove")
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {
@@ -71,6 +78,7 @@ public class StationController extends BaseController {
     }
 
     @Operation(summary = "站点设置关联数据")
+    @RequiresPermissions("device:station:edit")
     @PostMapping("/setData")
     public AjaxResult setData(@RequestBody Station station)
     {

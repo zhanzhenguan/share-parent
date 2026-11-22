@@ -43,8 +43,7 @@ public class OnMessageCallback implements MqttCallback {
                 massageHandler.handleMessage(jsonMessage);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            log.error("mqtt消息异常：{}", new String(message.getPayload()));
+            log.error("mqtt消息处理异常：{}", new String(message.getPayload()), e);
         }
     }
 
